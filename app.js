@@ -17,10 +17,9 @@ new Vue({
         attack() {
             let damage = this.calculateDamage(3, 10)
             this.monsterHealth -= damage
-            this.turns.unshift({
-                isPlayer: true,
-                text: 'Player hits Monster for ' + damage
-            })
+
+            this.turnsLog(damage, true, 'attack')
+            
             if (this.checkWin()) {
                 return
             }
@@ -31,10 +30,9 @@ new Vue({
         specialAttack() {
             let damage = this.calculateDamage(10, 20)
             this.monsterHealth -= damage
-            this.turns.unshift({
-                isPlayer: true,
-                text: 'Player hits Monster hard for ' + damage
-            })
+            
+            this.turnsLog(damage, true, 'specAttack')
+
             if(this.checkWin()) {
                 return
             }
@@ -47,10 +45,9 @@ new Vue({
             } else {
                 this.playerHealth = 100;
             }
-            this.turns.unshift({
-                isPlayer: true,
-                text: 'Player heals for 10'
-            })
+            
+            this.turnsLog('', true, 'heal')
+
             this.monsterAttacks()
         },
 
@@ -60,14 +57,37 @@ new Vue({
             this.monsterHealth = 100
             this.turns = []
         },
+
+        turnsLog(dmg, isPlayer, actionType) {
+            if (isPlayer) {
+                if (actionType == 'attack') {
+                    this.turns.unshift({
+                        isPlayer,
+                        text: 'Player hits Monster for ' + dmg
+                    }) 
+                } else if (actionType ==  'heal') {
+                    this.turns.unshift({
+                        isPlayer,
+                        text: 'Player heals for 10'
+                    })
+                }  else if (actionType == 'specAttack') {
+                    this.turns.unshift({
+                        isPlayer,
+                        text: 'Player hits Monster hard for ' + dmg
+                    })
+                }
+            } else {
+                this.turns.unshift({
+                    isPlayer,
+                    text: 'Monster hits Player for ' + dmg
+                })
+            }
+        },
         monsterAttacks() {
             let damage = this.calculateDamage(5, 12)
             this.playerHealth -= this.calculateDamage(5, 12)
             this.checkWin()
-            this.turns.unshift({
-                isPlayer: false,
-                text: 'Monster hits Player for ' + damage
-            })
+            this.turnsLog(damage, false)
         },
         calculateDamage(min,  max) {
             return Math.max(Math.floor(Math.random() * max ) + 1, min)
@@ -90,19 +110,6 @@ new Vue({
                 return true
             }
             return false
-        }
-
-    },
-    watch: {
-        playerHealth(){
-           if(this.playerHealth  < 0) {
-               this.playerHealth = 0
-           } 
-        },
-        monsterHealth(){
-            if(this.monsterHealth < 0) {
-                this.monsterHealth =  0
-            }
         }
     }
 })
